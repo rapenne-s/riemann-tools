@@ -160,19 +160,19 @@ class Riemann::Tools::Health
   end
 
   def openbsd_cpu
-    u2, n2, s2, t2, i2 = `sysctl -n kern.cp_time 2>/dev/null`.split(',').map{ |e| e.to_i } #OpenBSD separates with ,
+    u2, n2, s2, p2, t2, i2 = `sysctl -n kern.cp_time 2>/dev/null`.split(',').map{ |e| e.to_i } #OpenBSD separates with ,
 
     if @old_cpu
-      u1, n1, s1, t1, i1 = @old_cpu
+      u1, n1, s1, p1, t1, i1 = @old_cpu
 
-      used = (u2+n2+s2+t2) - (u1+n1+s1+t1)
+      used = (u2+n2+s2+p2+t2) - (u1+n1+s1+p1+t1)
       total = used + i2-i1
       fraction = used.to_f / total
 
-      report_pct :cpu, fraction, "user+nice+sytem+interrupt\n\n#{`ps -axo pcpu,pid,comm | sort -nrb -k1 | head -10`.chomp}"
+      report_pct :cpu, fraction, "user+nice+sytem+spin+interrupt\n\n#{`ps -axo pcpu,pid,comm | sort -nrb -k1 | head -10`.chomp}"
     end
 
-    @old_cpu = [u2, n2, s2, t2, i2]
+    @old_cpu = [u2, n2, s2, p2, t2, i2]
   end
 
   def sunos_cpu
